@@ -1,0 +1,18 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.28"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+
+[rpc_endpoints]
+somnia_testnet = "https://dream-rpc.somnia.network"
+
+# Etherscan verification (optional - only needed if verifying contracts)
+# Uncomment and set SOMNIA_API_KEY in .env if verification is available
+# [etherscan]
+# somnia_testnet = { key = "${SOMNIA_API_KEY}", url = "https://dream-rpc.somnia.network" }
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
