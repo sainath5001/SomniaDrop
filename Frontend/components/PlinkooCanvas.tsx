@@ -39,14 +39,14 @@ export function PlinkooCanvas({ pattern, outcome, onAnimationComplete, isPlaying
       // Small delay to ensure canvas is ready
       const timer = setTimeout(() => {
         if (ballManagerRef.current) {
-          ballManagerRef.current.startGame(
-            pattern,
-            outcome,
-            (completedOutcome) => {
-              setIsAnimating(false);
-              onAnimationComplete?.(completedOutcome);
-            }
-          );
+      ballManagerRef.current.startGame(
+        pattern,
+        outcome,
+        (completedOutcome) => {
+          setIsAnimating(false);
+          onAnimationComplete?.(completedOutcome);
+        }
+      );
         }
       }, 50);
       

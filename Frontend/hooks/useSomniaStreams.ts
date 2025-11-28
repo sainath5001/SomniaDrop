@@ -46,8 +46,8 @@ export function useSomniaStreamsWeb2() {
             sdkInstance.streams.computeSchemaId(gameResultSchema),
             timeoutPromise
           ]) as `0x${string}`;
-          
-          setSdk(sdkInstance);
+        
+        setSdk(sdkInstance);
           setSchemaId(computedSchemaId);
         } catch (timeoutError) {
           // If timeout, still set SDK but without schemaId - app can work without it

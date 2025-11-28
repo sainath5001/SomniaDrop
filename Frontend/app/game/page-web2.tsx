@@ -57,7 +57,7 @@ export default function GamePageWeb2() {
 
     return () => {
       if (subscription && 'unsubscribe' in subscription) {
-        subscription.unsubscribe();
+        (subscription as { unsubscribe: () => void }).unsubscribe();
       }
     };
   }, [subscribeToGameResults]);

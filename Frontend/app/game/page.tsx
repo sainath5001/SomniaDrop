@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { usePlinkooWeb2 } from '@/hooks/usePlinkoo';
 import { useSomniaStreamsWeb2 } from '@/hooks/useSomniaStreams';
 import { PlinkooCanvas } from '@/components/PlinkooCanvas';
+import { Plinkoo3D } from '@/components/Plinkoo3D';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { GameStats } from '@/components/GameStats';
 import { GameControls } from '@/components/GameControls';
 import { GameHistoryWeb2 } from '@/components/GameHistoryWeb2';
@@ -174,10 +177,16 @@ export default function GamePageWeb2() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 relative overflow-hidden">
+      <AnimatedBackground />
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-between items-center mb-6"
+        >
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               SomniaDrop Game
@@ -197,7 +206,7 @@ export default function GamePageWeb2() {
               Home
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Info Banner */}
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
@@ -227,19 +236,28 @@ export default function GamePageWeb2() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Game Canvas */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
+            >
               <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Play SomniaDrop</h2>
-              <PlinkooCanvas
+              <Plinkoo3D
                 pattern={gameState.pattern}
                 outcome={gameState.outcome}
                 onAnimationComplete={handleAnimationComplete}
-                isPlaying={gameState.isPlaying}
+                isPlaying={gameState.isPlaying && gameState.pattern.length > 0}
               />
-            </div>
+            </motion.div>
           </div>
 
           {/* Controls */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             <GameControls
               onPlay={handlePlay}
               onDeposit={handleDeposit}
@@ -249,13 +267,18 @@ export default function GamePageWeb2() {
               isPending={isPending}
               isConfirming={false}
             />
-          </div>
+          </motion.div>
         </div>
 
         {/* Game History */}
-        <div className="mt-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-6"
+        >
           <GameHistoryWeb2 />
-        </div>
+        </motion.div>
       </div>
     </div>
   );
