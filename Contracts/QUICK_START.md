@@ -77,3 +77,6 @@ cd Contracts && touch .env && echo "export PRIVATE_KEY=your_key_here" > .env && 
 **Use Method 1** (without source) - it's simpler and Foundry handles it automatically!
 
 
+
+
+

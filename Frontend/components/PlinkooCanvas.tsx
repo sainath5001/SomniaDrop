@@ -34,16 +34,23 @@ export function PlinkooCanvas({ pattern, outcome, onAnimationComplete, isPlaying
   }, []);
 
   useEffect(() => {
-    if (isPlaying && pattern.length > 0 && ballManagerRef.current) {
+    if (isPlaying && pattern.length > 0 && outcome >= 0 && ballManagerRef.current) {
       setIsAnimating(true);
-      ballManagerRef.current.startGame(
-        pattern,
-        outcome,
-        (completedOutcome) => {
-          setIsAnimating(false);
-          onAnimationComplete?.(completedOutcome);
+      // Small delay to ensure canvas is ready
+      const timer = setTimeout(() => {
+        if (ballManagerRef.current) {
+          ballManagerRef.current.startGame(
+            pattern,
+            outcome,
+            (completedOutcome) => {
+              setIsAnimating(false);
+              onAnimationComplete?.(completedOutcome);
+            }
+          );
         }
-      );
+      }, 50);
+      
+      return () => clearTimeout(timer);
     } else if (!isPlaying && ballManagerRef.current) {
       ballManagerRef.current.reset();
       setIsAnimating(false);
@@ -60,5 +67,6 @@ export function PlinkooCanvas({ pattern, outcome, onAnimationComplete, isPlaying
     </div>
   );
 }
+
 
 

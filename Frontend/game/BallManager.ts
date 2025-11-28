@@ -78,27 +78,32 @@ export class BallManager {
     this.currentDrop = 0;
     this.onComplete = onComplete;
 
-    // Start ball at top center
+    // Start ball at top center with initial downward velocity
     this.ball = {
       x: this.canvas.width / 2,
       y: 50,
       vx: 0,
-      vy: 0,
+      vy: 1, // Start with small downward velocity
       radius: 8,
       color: '#3b82f6',
     };
 
+    // Reset animation
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
     this.animate();
   }
 
   private animate = () => {
     if (!this.ball) return;
 
+    this.update();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.draw();
-    this.update();
 
-    if (this.ball.y < this.canvas.height - 100) {
+    // Continue animation until ball reaches the bottom sinks
+    if (this.ball.y < this.canvas.height - 30) {
       this.animationId = requestAnimationFrame(this.animate);
     } else {
       // Ball reached bottom
@@ -106,20 +111,25 @@ export class BallManager {
         this.onComplete(this.outcome);
       }
       this.ball = null;
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+        this.animationId = null;
+      }
     }
   };
 
   private update() {
     if (!this.ball) return;
 
-    // Gravity
-    this.ball.vy += 0.3;
+    // Gravity - stronger to ensure ball falls
+    this.ball.vy += 0.5;
 
     // Apply pattern-based direction at obstacles
     const obstacleY = 150;
-    if (this.ball.y > obstacleY && this.ball.y < obstacleY + 600 && this.currentDrop < this.pattern.length) {
+    const obstacleHeight = 600;
+    if (this.ball.y > obstacleY && this.ball.y < obstacleY + obstacleHeight && this.currentDrop < this.pattern.length) {
       const direction = this.pattern[this.currentDrop] === 1 ? 1 : -1;
-      this.ball.vx += direction * 0.2;
+      this.ball.vx += direction * 0.3;
       this.currentDrop++;
     }
 
@@ -218,5 +228,6 @@ export class BallManager {
     this.draw();
   }
 }
+
 
 

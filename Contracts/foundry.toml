@@ -9,6 +9,7 @@ via_ir = false
 
 [rpc_endpoints]
 somnia_testnet = "https://dream-rpc.somnia.network"
+somnia_testnet_alt = "https://rpc-testnet.somnia.network"
 
 # Etherscan verification (optional - only needed if verifying contracts)
 # Uncomment and set SOMNIA_API_KEY in .env if verification is available

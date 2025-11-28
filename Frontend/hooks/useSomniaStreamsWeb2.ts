@@ -25,7 +25,6 @@ export function useSomniaStreamsWeb2() {
     }
 
     // Initialize SDK with public client only (for subscribing)
-    // Use timeout to prevent hanging if RPC is unavailable
     const initializeSDK = async () => {
       try {
         const publicClient = createSomniaPublicClient();
@@ -36,30 +35,12 @@ export function useSomniaStreamsWeb2() {
           wallet: undefined,
         });
 
-        // Add timeout for schema computation (5 seconds)
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('SDK initialization timeout')), 5000)
-        );
-
-        try {
-          const computedSchemaId = await Promise.race([
-            sdkInstance.streams.computeSchemaId(gameResultSchema),
-            timeoutPromise
-          ]) as `0x${string}`;
-          
-          setSdk(sdkInstance);
-          setSchemaId(computedSchemaId);
-        } catch (timeoutError) {
-          // If timeout, still set SDK but without schemaId - app can work without it
-          console.warn('SDK schema computation timed out, continuing without it');
-          setSdk(sdkInstance);
-          setSchemaId(null);
-        }
+        const computedSchemaId = await sdkInstance.streams.computeSchemaId(gameResultSchema);
+        
+        setSdk(sdkInstance);
+        setSchemaId(computedSchemaId as `0x${string}`);
       } catch (error) {
-        console.warn('Somnia SDK initialization failed (this is okay - game will work without it):', error);
-        // Don't block the app if SDK fails - it's optional
-        setSdk(null);
-        setSchemaId(null);
+        console.error('Failed to initialize Somnia SDK:', error);
       }
     };
 
@@ -145,17 +126,7 @@ export function useSomniaStreamsWeb2() {
         wallet: walletClient,
       });
 
-      // Validate address format
-      const isValidAddress = /^0x[a-fA-F0-9]{40}$/.test(gameData.player);
-      if (!isValidAddress) {
-        throw new Error(`Invalid address format: ${gameData.player}. Must be a valid Ethereum address.`);
-      }
-
       const encoder = new SchemaEncoder(gameResultSchema);
-      
-      // Convert pattern array to array of strings (required format for uint256[])
-      const patternArray = gameData.pattern.map(p => p.toString());
-      
       const encodedData = encoder.encodeData([
         { name: 'gameId', value: gameData.gameId, type: 'uint256' },
         { name: 'player', value: gameData.player, type: 'address' },
@@ -163,7 +134,7 @@ export function useSomniaStreamsWeb2() {
         { name: 'outcome', value: gameData.outcome.toString(), type: 'uint8' },
         { name: 'multiplier', value: gameData.multiplier, type: 'uint256' },
         { name: 'winnings', value: gameData.winnings, type: 'uint256' },
-        { name: 'pattern', value: patternArray, type: 'uint256[]' },
+        { name: 'pattern', value: JSON.stringify(gameData.pattern), type: 'uint256[]' },
         { name: 'timestamp', value: gameData.timestamp.toString(), type: 'uint256' },
       ]);
 
@@ -201,4 +172,6 @@ declare global {
     ethereum?: any;
   }
 }
+
+
 

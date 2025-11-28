@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ProvidersWeb2 } from '@/lib/providers';
-import { DarkModeToggle } from '@/components/DarkModeToggle';
+import { Providers } from '@/lib/providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SomniaDrop Game - Welcome to Somnia World',
-  description: 'Play SomniaDrop with Somnia Data Streams - No wallet required!',
+  title: 'Plinkoo Game - Somnia Data Streams',
+  description: 'Play Plinkoo on Somnia Network with real-time data streaming',
 };
 
 export default function RootLayout({
@@ -19,12 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className} suppressHydrationWarning>
-        <ProvidersWeb2>
-          <DarkModeToggle />
-          {children}
-        </ProvidersWeb2>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+
+
 

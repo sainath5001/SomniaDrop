@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { usePlinkooWeb2 } from '@/hooks/usePlinkoo';
-import { useSomniaStreamsWeb2 } from '@/hooks/useSomniaStreams';
+import { usePlinkooWeb2 } from '@/hooks/usePlinkooWeb2';
+import { useSomniaStreamsWeb2 } from '@/hooks/useSomniaStreamsWeb2';
 import { PlinkooCanvas } from '@/components/PlinkooCanvas';
 import { GameStats } from '@/components/GameStats';
 import { GameControls } from '@/components/GameControls';
@@ -45,9 +45,6 @@ export default function GamePageWeb2() {
 
   // Subscribe to real-time game results from other players (optional)
   useEffect(() => {
-    // Only subscribe if SDK is available
-    if (!subscribeToGameResults) return;
-    
     const subscription = subscribeToGameResults(
       (data) => {
         console.log('New game result streamed from another player:', data);
@@ -59,8 +56,8 @@ export default function GamePageWeb2() {
     );
 
     return () => {
-      if (subscription && typeof subscription === 'object' && 'unsubscribe' in subscription) {
-        (subscription as any).unsubscribe();
+      if (subscription && 'unsubscribe' in subscription) {
+        subscription.unsubscribe();
       }
     };
   }, [subscribeToGameResults]);
@@ -68,23 +65,13 @@ export default function GamePageWeb2() {
   // Handle game play
   const handlePlay = async (betAmount: string) => {
     try {
-      // Reset game state first
-      setGameState({
-        pattern: [],
-        outcome: 0,
-        winnings: 0,
-        multiplier: 0,
-        isPlaying: false,
-      });
+      setGameState((prev) => ({ ...prev, isPlaying: false }));
       
       const result = await playGame(betAmount);
       
       console.log('Game result:', result);
 
-      // Small delay to ensure canvas is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Update game state to trigger animation
+      // Update game state
       setGameState({
         pattern: result.pattern,
         outcome: result.outcome,
@@ -94,31 +81,21 @@ export default function GamePageWeb2() {
       });
 
       // Optionally publish to Somnia Data Streams (if wallet available)
-      // Only publish if wallet is connected (will use wallet address)
-      if (hasWallet && publishGameResult) {
+      if (hasWallet) {
         try {
-          // Get wallet address if available
-          const accounts = await window.ethereum?.request({ method: 'eth_accounts' });
-          const playerAddress = accounts && accounts.length > 0 
-            ? accounts[0] 
-            : '0x0000000000000000000000000000000000000000'; // Zero address as fallback
-          
-          // Only publish if we have a valid address (not zero address)
-          if (playerAddress !== '0x0000000000000000000000000000000000000000') {
-            await publishGameResult({
-              gameId: result.gameId.toString(),
-              player: playerAddress,
-              betAmount: betAmount,
-              outcome: result.outcome,
-              multiplier: result.multiplier.toString(),
-              winnings: result.winnings.toString(),
-              pattern: result.pattern, // Array of numbers [0,1,0,...]
-              timestamp: Math.floor(Date.now() / 1000),
-            });
-          }
+          await publishGameResult({
+            gameId: result.gameId.toString(),
+            player: 'web2_player', // Could use a user ID
+            betAmount: betAmount,
+            outcome: result.outcome,
+            multiplier: result.multiplier.toString(),
+            winnings: result.winnings.toString(),
+            pattern: result.pattern,
+            timestamp: Math.floor(Date.now() / 1000),
+          });
         } catch (error) {
-          console.warn('Failed to publish to Somnia Data Streams (game still works):', error);
-          // Game still works without publishing - don't show error to user
+          console.warn('Failed to publish to Somnia Data Streams:', error);
+          // Game still works without publishing
         }
       }
     } catch (error: any) {
@@ -174,15 +151,15 @@ export default function GamePageWeb2() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-              SomniaDrop Game
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Plinkoo Game (Web2)
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">Welcome to Somnia World</p>
+            <p className="text-gray-600">Somnia Data Streams Integration - No Wallet Required!</p>
             {hasWallet && (
               <p className="text-sm text-green-600 mt-1">
                 ✓ Wallet detected - Game results will be published to Somnia Data Streams
@@ -200,11 +177,10 @@ export default function GamePageWeb2() {
         </div>
 
         {/* Info Banner */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-          <p className="text-blue-800 dark:text-blue-200">
-            🎮 Play instantly — no wallet required.
-            <br />
-            Connect your wallet anytime to broadcast your game results live to Somnia Data Streams.
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-blue-800">
+            🎮 This is a Web2 version - no wallet connection required! Game data is stored locally.
+            {hasWallet && ' Connect your wallet to publish game results to Somnia Data Streams.'}
           </p>
         </div>
 
@@ -227,8 +203,8 @@ export default function GamePageWeb2() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Game Canvas */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Play SomniaDrop</h2>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold mb-4">Play Plinkoo</h2>
               <PlinkooCanvas
                 pattern={gameState.pattern}
                 outcome={gameState.outcome}

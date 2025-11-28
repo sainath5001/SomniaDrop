@@ -15,11 +15,11 @@ import {MockERC20} from "../src/MockERC20.sol";
  */
 contract DeployScript is Script {
     function setUp() public {}
-    
+
     function run() public {
         // Get deployer private key from environment
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        
+
         // Get token address (optional - will deploy MockERC20 if not provided)
         address tokenAddress;
         try vm.envAddress("TOKEN_ADDRESS") returns (address addr) {
@@ -27,15 +27,15 @@ contract DeployScript is Script {
         } catch {
             tokenAddress = address(0);
         }
-        
+
         console.log("=== PlinkooGame Deployment ===");
         console.log("Network: Somnia Testnet");
         console.log("RPC URL: https://dream-rpc.somnia.network");
         console.log("Deployer:", vm.addr(deployerPrivateKey));
         console.log("");
-        
+
         vm.startBroadcast(deployerPrivateKey);
-        
+
         // Deploy or use existing token
         address token = tokenAddress;
         if (token == address(0)) {
@@ -48,14 +48,14 @@ contract DeployScript is Script {
         } else {
             console.log("Using existing token at:", token);
         }
-        
+
         // Deploy PlinkooGame
         console.log("\nDeploying PlinkooGame...");
         PlinkooGame game = new PlinkooGame(token);
         console.log("PlinkooGame deployed at:", address(game));
-        
+
         vm.stopBroadcast();
-        
+
         // Log deployment summary
         console.log("\n=== Deployment Summary ===");
         console.log("Token Address:", token);
@@ -70,4 +70,3 @@ contract DeployScript is Script {
         console.log("4. Connect frontend to deployed contract");
     }
 }
-
